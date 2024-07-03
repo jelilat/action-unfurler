@@ -1,0 +1,23 @@
+{
+    "actions": [
+      {
+        "name": "Donate",
+        "description": "Donate to Alice",
+        "url": "/api/donate",
+        "method": "POST",
+        "parameters": [
+          {
+            "name": "account",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "amount",
+            "type": "string",
+            "required": false,
+            "default": "0.01"
+          }
+        ]
+      }
+    ]
+  }
