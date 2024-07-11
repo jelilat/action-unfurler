@@ -1,12 +1,22 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { ClientBlinkRenderer } from "./components/ClientBlinkRenderer";
 import { WagmiWrapper } from "./components/WagmiWrapper";
 
 export default function Home() {
+  const searchParams = useSearchParams();
   const [url, setUrl] = useState("");
   const [isUnfurled, setIsUnfurled] = useState(false);
+
+  useEffect(() => {
+    const urlParam = searchParams.get("url");
+    if (urlParam) {
+      setUrl(urlParam);
+      setIsUnfurled(true);
+    }
+  }, [searchParams]);
 
   const handleUnfurl = () => {
     setIsUnfurled(true);
@@ -25,7 +35,7 @@ export default function Home() {
             type="text"
             onChange={(e) => setUrl(e.target.value)}
             value={url}
-            placeholder="https://jup.ag/swap/SOL-USDT"
+            placeholder="https://buy-me-a-cofee-action.vercel.app/api/tip"
             className="text-black border-2 border-gray-300 rounded-l-lg p-2 w-80 focus:outline-none focus:border-blue-500"
           />
           <button
