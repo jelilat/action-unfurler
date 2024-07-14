@@ -10,6 +10,7 @@ import {
   type ActionAdapter,
   type ActionCallbacksConfig,
 } from "@dialectlabs/blinks";
+import { useActionAdapter } from "@dialectlabs/blinks/react";
 import { checkSecurity, type SecurityLevel } from "./shared/security";
 import { proxify } from "./utils/proxify";
 import { ActionsURLMapper, type ActionsJsonConfig } from "./utils/url-mapper";
@@ -30,8 +31,12 @@ export function BlinkRenderer({
   securityLevel = "only-trusted",
 }: BlinkRendererProps) {
   const [action, setAction] = useState<Action | null>(null);
+  const { adapter } = useActionAdapter(
+    process.env.NEXT_PUBLIC_SOLANA_RPC_URL!
+  );
 
   useEffect(() => {
+    console.log(url);
     const fetchAction = async () => {
       // TODO: CHECK SECURITY
       try {
@@ -69,25 +74,31 @@ export function BlinkRenderer({
           const actionsJson = await fetch(proxify(actionsJsonUrl)).then(
             (res) => res.json() as Promise<ActionsJsonConfig>
           );
-          console.log("Fetched actions.json:", actionsJson);
 
           const actionsUrlMapper = new ActionsURLMapper(actionsJson);
           actionApiUrl = actionsUrlMapper.mapUrl(actionUrl);
-          console.log("Mapped action API URL:", actionApiUrl);
         }
+        if (actionApiUrl) {
+          const actionJson = await fetch(proxify(actionApiUrl)).then((res) =>
+            res.json()
+          );
 
-        const state = actionApiUrl
-          ? getExtendedActionState(actionApiUrl)
-          : null;
+          const state = actionApiUrl
+            ? getExtendedActionState(actionApiUrl)
+            : null;
 
-        // if (!actionApiUrl || !state || !checkSecurity(state, securityLevel)) {
-        //   console.log("Security check failed or invalid action API URL");
-        //   return;
-        // }
-
-        const fetchedAction = await Action.fetch(actionApiUrl!, config);
-
-        setAction(fetchedAction);
+          // if (!actionApiUrl || !state || !checkSecurity(state, securityLevel)) {
+          //   console.log("Security check failed or invalid action API URL");
+          //   return;
+          // }
+          console.log(actionJson.isEthereum);
+          const fetchedAction = await Action.fetch(
+            actionApiUrl!,
+            actionJson.isEthereum ? config : adapter
+          );
+          console.log(fetchedAction);
+          setAction(fetchedAction);
+        }
       } catch (error) {
         console.error("Error in fetchAction:", error);
       }

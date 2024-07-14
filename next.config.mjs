@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // transpilePackages: ['@noble/curves', 'bs58'],
     async headers() {
       return [
         {
