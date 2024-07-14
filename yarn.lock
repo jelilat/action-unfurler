@@ -157,10 +157,10 @@
     preact "^10.16.0"
     sha.js "^2.4.11"
 
-"@dialectlabs/blinks@^0.3.1":
-  version "0.3.2"
-  resolved "https://registry.yarnpkg.com/@dialectlabs/blinks/-/blinks-0.3.2.tgz#d38f114cf2ca9ef9e722105ff95f34133ed7572b"
-  integrity sha512-DDpvXY1uioNx+JxtqMyuf7n8RlOy7LTVWwP05llKhSRyc/wffjN5xN/M0VcGEybWusSWZHha1G+kniLwDU1aYw==
+"@dialectlabs/blinks@^0.4.6":
+  version "0.4.6"
+  resolved "https://registry.yarnpkg.com/@dialectlabs/blinks/-/blinks-0.4.6.tgz#7f4a4123b8bda827e3a161883a726cbca9b96ac1"
+  integrity sha512-EmJTF63Yrd5a7LI9/nraA0JwGEO5mE+hNYE/5+qwIfzNmOiSwjx/bXksM/1VRIUFi0aoYH9RkanAmhYQvVxCGQ==
   dependencies:
     clsx "^2.1.1"
 
