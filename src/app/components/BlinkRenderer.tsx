@@ -106,6 +106,7 @@ export function BlinkRenderer({
           websiteUrl={url}
           websiteText={new URL(url).hostname}
           callbacks={callbacks}
+          stylePreset="default"
           //   securityLevel={{
           //     actions: securityLevel,
           //     websites: securityLevel,
