@@ -1,12 +1,12 @@
 "use client";
-
-import React from "react";
-import { BlinkRenderer } from "./BlinkRenderer";
-import { ActionAdapter } from "@dialectlabs/blinks";
+import { useEffect, useState } from "react";
 import { useConnect, useAccount, useSendTransaction } from "wagmi";
 import { parseEther } from "viem";
+import { Action, ActionAdapter, Blink } from "@dialectlabs/blinks";
+import { BlinkRendererProps } from "./BlinkRenderer";
 
-export function ClientBlinkRenderer({ url }: { url: string }) {
+const Ethereum = ({ actionUrl, websiteUrl, callbacks }: BlinkRendererProps) => {
+  const [action, setAction] = useState<Action | null>(null);
   const { connectors, connect } = useConnect();
   const { address } = useAccount();
   const { data: hash, sendTransaction } = useSendTransaction();
@@ -37,17 +37,26 @@ export function ClientBlinkRenderer({ url }: { url: string }) {
     },
   };
 
+  useEffect(() => {
+    const fetchAction = async () => {
+      const action = await Action.fetch(actionUrl, ethereumAdapter);
+      setAction(action);
+    };
+    fetchAction();
+  }, [actionUrl]);
+
   return (
-    <div className="w-full h-screen flex">
-      <div className="w-1/4"></div>
-      <div className="w-1/2 m-4 max-h-screen">
-        <BlinkRenderer
-          url={url}
-          config={ethereumAdapter}
-          securityLevel="only-trusted"
+    <>
+      {action && (
+        <Blink
+          action={action}
+          websiteUrl={websiteUrl}
+          websiteText={new URL(websiteUrl).hostname}
+          callbacks={callbacks}
         />
-      </div>
-      <div className="w-1/4"></div>
-    </div>
+      )}
+    </>
   );
-}
+};
+
+export default Ethereum;

@@ -17,7 +17,13 @@
         "name": "next"
       }
     ],
+    "baseUrl": ".",
     "paths": {
+      "@/components/*": ["./src/components/*"],
+      "@/shared/*": ["./src/components/shared/*"],
+      "@/utils/*": ["./src/components/utils/*"],
+      "@/types/*": ["./src/components/types/*"],
+      "@/renderer/*": ["./src/components/renderer/*"],
       "@/*": ["./src/*"]
     }
   },

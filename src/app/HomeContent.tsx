@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { ClientBlinkRenderer } from "./components/ClientBlinkRenderer";
-import { WagmiWrapper } from "./components/WagmiWrapper";
+import { BlinkRenderer } from "@/renderer/BlinkRenderer";
+import { WagmiWrapper } from "@/components/WagmiWrapper";
 
 export default function HomeContent() {
   const searchParams = useSearchParams();
@@ -47,7 +47,7 @@ export default function HomeContent() {
         </div>
         {isUnfurled && (
           <WagmiWrapper>
-            <ClientBlinkRenderer url={url} />
+            <BlinkRenderer url={url} />
           </WagmiWrapper>
         )}
       </div>

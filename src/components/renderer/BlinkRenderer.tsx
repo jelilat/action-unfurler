@@ -1,42 +1,34 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import {
-  Action,
-  ActionContainer,
   ActionsRegistry,
   getExtendedActionState,
   getExtendedInterstitialState,
   getExtendedWebsiteState,
-  type ActionAdapter,
   type ActionCallbacksConfig,
 } from "@dialectlabs/blinks";
 import { useActionAdapter } from "@dialectlabs/blinks/react";
-import { checkSecurity, type SecurityLevel } from "./shared/security";
-import { proxify } from "./utils/proxify";
-import { ActionsURLMapper, type ActionsJsonConfig } from "./utils/url-mapper";
-import { isInterstitial } from "./utils/interstitial-url";
+import { checkSecurity, type SecurityLevel } from "@/shared/security";
+import { proxify } from "@/utils/proxify";
+import { ActionsURLMapper, type ActionsJsonConfig } from "@/utils/url-mapper";
+import { isInterstitial } from "@/utils/interstitial-url";
 import "@dialectlabs/blinks/index.css";
+import Ethereum from "./Ethereum";
+import Solana from "./Solana";
 
-interface BlinkRendererProps {
-  url: string;
-  config: ActionAdapter;
+export interface BlinkRendererProps {
+  actionUrl: string;
+  websiteUrl: string;
   callbacks?: Partial<ActionCallbacksConfig>;
-  securityLevel?: SecurityLevel;
 }
 
-export function BlinkRenderer({
-  url,
-  config,
-  callbacks = {},
-  securityLevel = "only-trusted",
-}: BlinkRendererProps) {
-  const [action, setAction] = useState<Action | null>(null);
-  const { adapter } = useActionAdapter(
-    process.env.NEXT_PUBLIC_SOLANA_RPC_URL!
-  );
+const securityLevel = "all";
+
+export function BlinkRenderer({ url }: { url: string }) {
+  const [isEthereum, setIsEthereum] = useState<boolean>(false);
+  const [actionUrl, setActionUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log(url);
     const fetchAction = async () => {
       // TODO: CHECK SECURITY
       try {
@@ -48,29 +40,25 @@ export function BlinkRenderer({
 
         let actionApiUrl: string | null;
         if (interstitialData.isInterstitial) {
-          console.log("Processing interstitial URL");
           const interstitialState = getExtendedInterstitialState(
             actionUrl.toString()
           );
 
           if (!checkSecurity(interstitialState, securityLevel)) {
             console.log("Security check failed for interstitial");
-            // return;
+            return;
           }
           actionApiUrl = interstitialData.decodedActionUrl;
-          console.log("Decoded action URL:", actionApiUrl);
         } else if (url.includes("/api/")) {
           actionApiUrl = url;
         } else {
-          console.log("Processing non-interstitial URL");
           const websiteState = getExtendedWebsiteState(actionUrl.toString());
-          console.log("Website state:", websiteState);
           if (!checkSecurity(websiteState, securityLevel)) {
             console.log("Security check failed for website");
-            // return;
+            return;
           }
+
           const actionsJsonUrl = actionUrl.origin + "/actions.json";
-          console.log("Fetching actions.json from:", actionsJsonUrl);
           const actionsJson = await fetch(proxify(actionsJsonUrl)).then(
             (res) => res.json() as Promise<ActionsJsonConfig>
           );
@@ -87,17 +75,12 @@ export function BlinkRenderer({
             ? getExtendedActionState(actionApiUrl)
             : null;
 
-          // if (!actionApiUrl || !state || !checkSecurity(state, securityLevel)) {
-          //   console.log("Security check failed or invalid action API URL");
-          //   return;
-          // }
-          console.log(actionJson.isEthereum);
-          const fetchedAction = await Action.fetch(
-            actionApiUrl!,
-            actionJson.isEthereum ? config : adapter
-          );
-          console.log(fetchedAction);
-          setAction(fetchedAction);
+          if (!actionApiUrl || !state || !checkSecurity(state, securityLevel)) {
+            console.log("Security check failed for action");
+            return;
+          }
+          setIsEthereum(actionJson.isEthereum);
+          setActionUrl(actionApiUrl);
         }
       } catch (error) {
         console.error("Error in fetchAction:", error);
@@ -105,26 +88,22 @@ export function BlinkRenderer({
     };
 
     fetchAction();
-  }, [url, config, securityLevel]);
+  }, [url]);
 
-  if (!action) return null;
+  if (!url) return null;
 
   return (
-    <>
-      {url && (
-        <ActionContainer
-          action={action}
-          websiteUrl={url}
-          websiteText={new URL(url).hostname}
-          callbacks={callbacks}
-          stylePreset="default"
-          //   securityLevel={{
-          //     actions: securityLevel,
-          //     websites: securityLevel,
-          //     interstitials: securityLevel,
-          //   }}
-        />
+    <div className="w-full h-screen flex">
+      <div className="w-1/4"></div>
+      {actionUrl && (
+        <div className="w-1/2 m-4 max-h-screen">
+          {isEthereum ? (
+            <Ethereum actionUrl={actionUrl} websiteUrl={url} />
+          ) : (
+            <Solana actionUrl={actionUrl} websiteUrl={url} />
+          )}
+        </div>
       )}
-    </>
+    </div>
   );
 }
