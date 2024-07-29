@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useConnect, useAccount, useSendTransaction } from "wagmi";
-import { parseEther } from "viem";
+import { parseTransaction } from "viem";
 import { Action, ActionAdapter, Blink } from "@dialectlabs/blinks";
 import { BlinkRendererProps } from "./BlinkRenderer";
 
@@ -21,10 +21,11 @@ const Ethereum = ({ actionUrl, websiteUrl, callbacks }: BlinkRendererProps) => {
         return { error: "Wallet not connected" };
       }
       try {
-        const transaction = JSON.parse(tx);
+        const transaction = parseTransaction(tx as `0x${string}`);
         await sendTransaction({
           to: transaction.to,
-          value: parseEther(transaction.value),
+          value: transaction.value,
+          data: transaction.data,
         });
         return { signature: hash! };
       } catch (error) {
